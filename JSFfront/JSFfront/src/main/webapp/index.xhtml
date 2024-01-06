@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<h:head>
+	<title>World Map</title>
+	<meta charset="utf-8" />
+	<script src="http://d3js.org/d3.v4.js"></script>
+	<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+	<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+	<link rel="stylesheet" href="styles/style.css"></link>
+</h:head>
+<h:body>
+
+	<div class="header">
+		<nav>
+			<img src="https://riskodds.com/assets/images/Risk_logo.png"
+				class="logo"></img>
+			<ul class="nav-links">
+				<li><a href="">Rules</a></li>
+				<li><a href="">Load game</a></li>
+				<li><a href="">Save game</a></li>
+				<li class="btn">Sign in</li>
+
+			</ul>
+		</nav>
+		<div class="content">
+			<img id="iconoCartas"
+				src="https://cdn.icon-icons.com/icons2/2248/PNG/512/cards_icon_138799.png"
+				alt="Icono de cartas" />
+			<div id="cartasUsuario">
+				<!-- Cartas del usuario -->
+			</div>
+			<h:form>
+				<!-- Create an element where the map will take place -->
+				<svg id="my_dataviz" width="1500" height="1100"></svg>
+			</h:form>
+
+
+			<h:outputScript>
+
+// The svg
+var svg = d3.select("svg"),
+  width = +svg.attr("width"),
+  height = +svg.attr("height");
+
+// Map and projection
+var path = d3.geoPath();
+var projection = d3.geoMercator()
+  .scale(150)
+  .center([0, 20])
+  .translate([width / 2, height / 2]);
+
+// Load external data and boot
+d3.queue()
+  .defer(d3.json, "https://raw.githubusercontent.com/Godzilla039/mapasa/main/world.geojson")
+  .defer(d3.csv, "https://raw.githubusercontent.com/Godzilla039/mapasa/main/world_population.csv")
+  .await(ready);
+
+function ready(error, topo) {
+
+  let mouseOver = function(d) {
+    d3.selectAll(".Country")
+      .transition()
+      .duration(200)
+      .style("opacity", .1);
+    d3.select(this)
+      .transition()
+      .duration(200)
+      .style("opacity", .1)
+      .style("stroke", "orange");
+  }
+
+  let mouseLeave = function(d) {
+    d3.selectAll(".Country")
+      .transition()
+      .duration(200)
+      .style("opacity", .1);
+    d3.select(this)
+      .transition()
+      .duration(200)
+      .style("stroke", "transparent");
+  }
+
+  // Draw the map
+  svg.append("g")
+    .selectAll("path")
+    .data(topo.features)
+    .enter()
+    .append("path")
+      // draw each country
+      .attr("d", d3.geoPath()
+        .projection(projection)
+      )
+      .style("stroke", "orange")
+      .attr("class", function(d){ return "Country" } )
+      .style("opacity", .8)
+      .on("mouseover", mouseOver)
+      .on("mouseleave", mouseLeave);
+}
+
+
+    </h:outputScript>
+		</div>
+
+		<div class="dice">
+			<!-- FIRST WE MAKE SIMPLE CUBE -->
+			<div class="container">
+				<div class="cube" id="cube">
+					<div class="front">
+						<span class="fas fa-circle"></span>
+					</div>
+					<div class="back">
+						<!-- i use pre tag to align dots -->
+						<pre class="firstPre">
+							<span class="fas fa-circle"></span>    <span
+								class="fas fa-circle"></span>    <span class="fas fa-circle"></span>
+						</pre>
+						<br></br>
+
+
+						<pre class="secondPre">
+							<span class="fas fa-circle"></span>    <span
+								class="fas fa-circle"></span>    <span class="fas fa-circle"></span>
+						</pre>
+					</div>
+					<div class="top">
+						<span class="fas fa-circle"></span> <span class="fas fa-circle"></span>
+					</div>
+					<div class="left">
+						<span class="fas fa-circle"></span> <span class="fas fa-circle"></span>
+						<span class="fas fa-circle"></span>
+
+					</div>
+					<div class="right">
+						<span class="fas fa-circle"></span> <span class="fas fa-circle"></span>
+						<span class="fas fa-circle"></span> <span class="fas fa-circle"></span>
+						<span class="fas fa-circle"></span>
+
+					</div>
+					<div class="bottom">
+						<span class="fas fa-circle"></span> <span class="fas fa-circle"></span>
+						<span class="fas fa-circle"></span> <span class="fas fa-circle"></span>
+
+					</div>
+				</div>
+			</div>
+			<!-- JS CODE -->
+			<h:outputScript type="text/javascript">
+				let cube = document.getElementById('cube');
+
+				angleArray = [ [ 0, 0, 0 ], [ -310, -362, -38 ],
+						[ -400, -320, -2 ], [ 135, -217, -88 ],
+						[ -224, -317, 5 ], [ -47, -219, -81 ],
+						[ -133, -360, -53 ] ];
+				//this array of degree that show the deffrent number 1 2 3 4 5 6 on cube ie
+				cube.addEventListener('click', function(e) {
+
+					/*ANIMATION */
+					cube.style.animation = 'animate 1.4s linear';
+
+					const randomAngle = Math.floor(Math.random() * 6) + 1;
+					//console.log(randomAngle);
+					cube.style.transform = 'rotateX('
+							+ angleArray[randomAngle][0] + 'deg) rotateY('
+							+ angleArray[randomAngle][1] + 'deg) rotateZ('
+							+ angleArray[randomAngle][2] + 'deg)';
+					cube.style.transition = '1s linear'
+
+					cube.addEventListener('animationend', function(e) {
+						cube.style.animation = '';
+					});
+				});
+			</h:outputScript>
+		</div>
+	</div>
+</h:body>
+</html>
